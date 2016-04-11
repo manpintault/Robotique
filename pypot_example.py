@@ -5,11 +5,17 @@ import pypot.dynamixel
 import numpy
 import time
 import kinematics
+import pygame
+from pygame.locals import *
 from contextlib import closing
 import pypot.robot
-found_ids = None
+found_ids = [11, 12, 13, 21, 22, 23, 31, 32, 33, 41, 42, 43, 51, 52, 53, 61, 62, 63]
 coord = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
 pates = None
+WINDOW_W = 600
+WINDOW_H = 600
+
+dancing = False
 
 def changeId(old, new):
 	dxl_io.change_id({old: new})
@@ -18,6 +24,23 @@ def changeId(old, new):
 			found_ids[found_ids.index(old)] = new
 
 	print found_ids
+
+def initLimitAngles():
+	for i in found_ids:
+		if(i == 11 or i == 41):
+			dxl_io.set_angle_limit({i : [-101, 101]})
+		if(i == 12 or i == 42):
+			dxl_io.set_angle_limit({i : [-90, 101]})
+		if(i == 13 or i == 43):
+			dxl_io.set_angle_limit({i : [-150, 79]})
+		if(i == 21 or i == 51):
+			dxl_io.set_angle_limit({i : [-35, 101]})
+		if(i == 22  or i == 32 or i == 52 or i == 62):
+			dxl_io.set_angle_limit({i : [-92 , 101]})
+		if(i == 23 or i == 33 or i == 53 or i == 63):
+			dxl_io.set_angle_limit({i : [-77 , 150]})
+		if(i == 31 or i == 61):
+			dxl_io.set_angle_limit({i : [-101 , 33]})
 
 def checkLeg(tab) :
 	dxl_io.set_goal_position({tab[0] : 0})
@@ -35,7 +58,7 @@ def initRobot() :
 			dxl_io.set_goal_position({i : -45})
 		else:
 			dxl_io.set_goal_position({i : 0})
-		time.sleep(0.2)
+		time.sleep(0.1)
 
 def initRobotIK():
 	coords = kinematics.computeDK(0, 0, 0)
@@ -64,7 +87,7 @@ def initPos(pates):
 #!!!!!! DEBUT DE LA MARCHE !!!!!!!!
 def faitUnPasAvant(coords, pates, x, y):
 	moveCenter(coords, pates, x, y, 0)
-	time.sleep(0.3)
+	time.sleep(0.)
 	for i in range(3):
 		moveLigneDroite(coords[i], pates[i], 0, 0, 20)
 		moveLigneDroite(coords[i+3], pates[i+3], 0, 0, 20)
@@ -76,14 +99,44 @@ def faitUnPasAvant(coords, pates, x, y):
 		moveLeg(pates, i+3, coords[i+3][0], coords[i+3][1], coords[i+3][2])
 		time.sleep(0.1)
 
+def tournerLesPates(coords, pates, x):
+	time.sleep(0.3)
+	#Pour chaque paire de pates
+	for i in range(3):
+		#On leve la pate
+		moveLeg(pates, i, coords[i][0], coords[i][1], coords[i][2] + 20)
+		moveLeg(pates, i+3, coords[i+3][0], coords[i+3][1], coords[i+3][2] + 20)
+		time.sleep(0.1)
+
+		#On fait une rotation de x degre
+		angles1 = kinematics.computeIK(coords[i][0], coords[i][1], coords[i][2])
+		angles1[0] = angles1[0] + x
+		newCoords1 = kinematics.computeDK(angles1[0], angles1[1], angles1[2])
+
+		angles2 = kinematics.computeIK(coords[i+3][0], coords[i+3][1], coords[i+3][2])
+		angles2[0] = angles2[0] + x
+		newCoords2 = kinematics.computeDK(angles2[0], angles2[1], angles2[2])
+
+		moveLeg(pates, i, newCoords1[0], newCoords1[1], newCoords1[2] + 20)
+		moveLeg(pates, i+3, newCoords2[0], newCoords2[1], newCoords2[2] + 20)
+		time.sleep(0.1)
+
+		#on rabaisse la pate
+		moveLeg(pates, i, newCoords1[0], newCoords1[1], newCoords1[2])
+		moveLeg(pates, i+3, newCoords2[0], newCoords2[1], newCoords2[2])
+		time.sleep(0.1)
+
+	for i in range(3):
+		moveLeg(pates, i, coords[i][0], coords[i][1], coords[i][2])
+		moveLeg(pates, i+3, coords[i+3][0], coords[i+3][1], coords[i+3][2])
+
+
 
 #!!!!!! Question 1 du projet !!!!!!!!
 def moveLeg(pates, numPate, x, y, z):
-	newCoords = [x, y, z]
-	angles = kinematics.computeIK(newCoords[0], newCoords[1], newCoords[2])
+	angles = kinematics.computeIK(x, y, z)
 	pos = dict(zip(pates[numPate], angles))
 	dxl_io.set_goal_position(pos)
-
 
 #!!!!!! FUN ROTATION !!!!!!!!
 #test nice with maxx = 10 and freq = 4.5
@@ -147,33 +200,76 @@ if __name__ == '__main__':
 	# with closing(pypot.robot.from_json('robotConfig.json')) as robot:
 	with pypot.dynamixel.DxlIO('/dev/ttyUSB0', baudrate=1000000) as dxl_io:
 
-		found_ids = [11, 12, 13, 21, 22, 23, 31, 32, 33, 41, 42, 43, 51, 52, 53, 61, 62, 63]
-#		found_ids = dxl_io.scan()
-#		print found_ids
+#		found_id = dxl_io.scan()
+#		print found_id
+
+#		initLimitAngles()
 
 		dxl_io.enable_torque(found_ids)
 		initRobot()
+		time.sleep(1)
 
 		pates = initPates()
 		coord = initPos(pates)
 
 
+		pygame.init()
+		fenetre = pygame.display.set_mode((WINDOW_W, WINDOW_H))
+		fond = pygame.image.load("Array.png").convert()
+		fenetre.blit(fond, (0, 0))
+		pygame.display.flip()
+
+
+		#for i in found_ids:
+		#print dxl_io.get_angle_limit(found_ids)
+#		print dxl_io.get_compliance_margin(found_ids)
+
+
+#		while 1:
+#			print dxl_io.get_present_position([62, 63])
+#			time.sleep(0.1)
+
 		print "ready"
 		time.sleep(0.5)
-		while 1:
+		a=1
+		while a:
 
-			faitUnPasAvant(coord, pates, 0, 30)
-			faitUnPasAvant(coord, pates, 30, 0)
-			faitUnPasAvant(coord, pates, 0, -30)
-			faitUnPasAvant(coord, pates, -30, 0)
+			pygame.display.flip()
+#			tournerLesPates(coord, pates, 10)
+			for event in pygame.event.get():
+				if event.type == MOUSEMOTION: #Si mouvement de souris
+					x = (event.pos[0] - WINDOW_W/2)/5
+					y = (event.pos[1] - WINDOW_H/2)/5
+				if event.type == MOUSEBUTTONDOWN:
+					if event.button == 1:
+						dancing = not dancing
+				if event.type == KEYDOWN:
+					if event.key== pygame.K_ESCAPE:
+						a=0
+
+			if dancing :
+				maxx = 10
+				freq = 4.5
+				moveTestRotate(maxx, freq)
+
+			print x
+			print y
+			if(x<-5 or x > 5 or y < -5 or y > 5):
+				faitUnPasAvant(coord, pates, x, y)
+#			faitUnPasAvant(coord, pates, 20, 20)
+#			faitUnPasAvant(coord, pates, -20, -20)
+#			faitUnPasAvant(coord, pates, -20, -20)
+#			faitUnPasAvant(coord, pates, 30, 0)
+#			faitUnPasAvant(coord, pates, 0, -30)
+#			faitUnPasAvant(coord, pates, -30, 0)
 
 #			moveCenter(coord, pates, 10, 10, -10)
 
 #			moveLeg(pates, 0, 100, 20, -140)
 
-#			maxx = 10
-#			freq = 4.5
-#			moveTestRotate(maxx, freq)
+			# maxx = 10
+			# freq = 4.5
+			# moveTestRotate(maxx, freq)
 
 
 
@@ -208,11 +304,7 @@ if __name__ == '__main__':
 
 
 
-		print 'Current pos:', dxl_io.get_present_position(found_ids)
-
-		time.sleep(1)  # we wait for 1s
-
-
+#		print 'Current pos:', dxl_io.get_present_position(found_ids)
 
 		dxl_io.disable_torque(found_ids)
 		# time.sleep(1)  # we wait for 1s
