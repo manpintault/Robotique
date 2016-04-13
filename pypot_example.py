@@ -51,23 +51,24 @@ if __name__ == '__main__':
 					run=0
 				if event.key == pygame.K_w:
 					writing = not writing
+					writingON = False
 				if event.key == pygame.K_k:
 					writingON = not writingON
 				if event.key == pygame.K_l:
 					move_leg = not move_leg
 				if event.key == pygame.K_a:
 					avance = not avance
-				if event.key == pygame.K_UP:
+				if move_leg and event.key == pygame.K_UP:
 					zleg = zleg + constant.LENGTH_MOUVEMENT_LEG
-				if event.key == pygame.K_DOWN:
+				if move_leg and event.key == pygame.K_DOWN:
 					zleg = zleg - constant.LENGTH_MOUVEMENT_LEG
-				if event.key == pygame.K_KP8:
+				if move_leg and event.key == pygame.K_KP8:
 					xleg = xleg + constant.LENGTH_MOUVEMENT_LEG
-				if event.key == pygame.K_KP2:
+				if move_leg and event.key == pygame.K_KP2:
 					xleg = xleg - constant.LENGTH_MOUVEMENT_LEG
-				if event.key == pygame.K_KP4:
+				if move_leg and event.key == pygame.K_KP4:
 					yleg = yleg + constant.LENGTH_MOUVEMENT_LEG
-				if event.key == pygame.K_KP6:
+				if move_leg and event.key == pygame.K_KP6:
 					yleg = yleg - constant.LENGTH_MOUVEMENT_LEG
 				if event.key == pygame.K_d:
 					init.initRobot()
