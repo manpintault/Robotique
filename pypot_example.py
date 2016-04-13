@@ -1,261 +1,110 @@
 import itertools
 import time
-import numpy
-import pypot.dynamixel
-import numpy
-import time
 import kinematics
 import pygame
 from pygame.locals import *
 from contextlib import closing
 import pypot.robot
-found_ids = [11, 12, 13, 21, 22, 23, 31, 32, 33, 41, 42, 43, 51, 52, 53, 61, 62, 63]
-coord = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
-pates = None
-WINDOW_W = 600
-WINDOW_H = 600
-
-dancing = False
-
-def changeId(old, new):
-	dxl_io.change_id({old: new})
-	for i in found_ids:
-		if(i == old):
-			found_ids[found_ids.index(old)] = new
-
-	print found_ids
-
-def initLimitAngles():
-	for i in found_ids:
-		if(i == 11 or i == 41):
-			dxl_io.set_angle_limit({i : [-101, 101]})
-		if(i == 12 or i == 42):
-			dxl_io.set_angle_limit({i : [-90, 101]})
-		if(i == 13 or i == 43):
-			dxl_io.set_angle_limit({i : [-150, 79]})
-		if(i == 21 or i == 51):
-			dxl_io.set_angle_limit({i : [-35, 101]})
-		if(i == 22  or i == 32 or i == 52 or i == 62):
-			dxl_io.set_angle_limit({i : [-92 , 101]})
-		if(i == 23 or i == 33 or i == 53 or i == 63):
-			dxl_io.set_angle_limit({i : [-77 , 150]})
-		if(i == 31 or i == 61):
-			dxl_io.set_angle_limit({i : [-101 , 33]})
-
-def checkLeg(tab) :
-	dxl_io.set_goal_position({tab[0] : 0})
-	time.sleep(1)
-	dxl_io.set_goal_position({tab[1] : 0})
-	time.sleep(1)
-	dxl_io.set_goal_position({tab[2] : 0})
-	time.sleep(2)
-
-def initRobot() :
-	for i in found_ids :
-		if(i in [21, 51]):
-			dxl_io.set_goal_position({i : 45})
-		elif(i in [31, 61]):
-			dxl_io.set_goal_position({i : -45})
-		else:
-			dxl_io.set_goal_position({i : 0})
-		time.sleep(0.1)
-
-def initRobotIK():
-	coords = kinematics.computeDK(0, 0, 0)
-	angles = kinematics.computeIK(coords[0], coords[1], coords[2])
-
-	pos = dict(zip(pates[0], angles))
-	dxl_io.set_goal_position(pos)
-
-def initPates():
-	pate1 = [11, 12, 13]
-	pate2 = [21, 22, 23]
-	pate3 = [31, 32, 33]
-	pate4 = [41, 42, 43]
-	pate5 = [51, 52, 53]
-	pate6 = [61, 62, 63]
-	pates = [pate1, pate2, pate3, pate4, pate5, pate6]
-	return pates
-
-def initPos(pates):
-	for i in range(6):
-		angles = dxl_io.get_present_position(pates[i])
-		coord[i] = kinematics.computeDK(angles[0], angles[1], angles[2])
-	return coord
-
-
-#!!!!!! DEBUT DE LA MARCHE !!!!!!!!
-def faitUnPasAvant(coords, pates, x, y):
-	moveCenter(coords, pates, x, y, 0)
-	time.sleep(0.)
-	for i in range(3):
-		moveLigneDroite(coords[i], pates[i], 0, 0, 20)
-		moveLigneDroite(coords[i+3], pates[i+3], 0, 0, 20)
-		time.sleep(0.1)
-		moveLeg(pates, i, coords[i][0], coords[i][1], coords[i][2] + 20)
-		moveLeg(pates, i+3, coords[i+3][0], coords[i+3][1], coords[i+3][2] + 20)
-		time.sleep(0.1)
-		moveLeg(pates, i, coords[i][0], coords[i][1], coords[i][2])
-		moveLeg(pates, i+3, coords[i+3][0], coords[i+3][1], coords[i+3][2])
-		time.sleep(0.1)
-
-def tournerLesPates(coords, pates, x):
-	time.sleep(0.3)
-	#Pour chaque paire de pates
-	for i in range(3):
-		#On leve la pate
-		moveLeg(pates, i, coords[i][0], coords[i][1], coords[i][2] + 20)
-		moveLeg(pates, i+3, coords[i+3][0], coords[i+3][1], coords[i+3][2] + 20)
-		time.sleep(0.1)
-
-		#On fait une rotation de x degre
-		angles1 = kinematics.computeIK(coords[i][0], coords[i][1], coords[i][2])
-		angles1[0] = angles1[0] + x
-		newCoords1 = kinematics.computeDK(angles1[0], angles1[1], angles1[2])
-
-		angles2 = kinematics.computeIK(coords[i+3][0], coords[i+3][1], coords[i+3][2])
-		angles2[0] = angles2[0] + x
-		newCoords2 = kinematics.computeDK(angles2[0], angles2[1], angles2[2])
-
-		moveLeg(pates, i, newCoords1[0], newCoords1[1], newCoords1[2] + 20)
-		moveLeg(pates, i+3, newCoords2[0], newCoords2[1], newCoords2[2] + 20)
-		time.sleep(0.1)
-
-		#on rabaisse la pate
-		moveLeg(pates, i, newCoords1[0], newCoords1[1], newCoords1[2])
-		moveLeg(pates, i+3, newCoords2[0], newCoords2[1], newCoords2[2])
-		time.sleep(0.1)
-
-	for i in range(3):
-		moveLeg(pates, i, coords[i][0], coords[i][1], coords[i][2])
-		moveLeg(pates, i+3, coords[i+3][0], coords[i+3][1], coords[i+3][2])
-
-
-
-#!!!!!! Question 1 du projet !!!!!!!!
-def moveLeg(pates, numPate, x, y, z):
-	angles = kinematics.computeIK(x, y, z)
-	pos = dict(zip(pates[numPate], angles))
-	dxl_io.set_goal_position(pos)
-
-#!!!!!! FUN ROTATION !!!!!!!!
-#test nice with maxx = 10 and freq = 4.5
-def moveTestRotate(maxx, freq):
-	moveCenter(coord, pates, maxx*numpy.sin(freq*time.time()*2*numpy.pi), maxx*numpy.cos(freq*time.time()*2*numpy.pi), maxx*numpy.cos(freq*time.time()*2*numpy.pi))
-	moveCenter(coord, pates, -maxx*numpy.sin(freq*time.time()*2*numpy.pi), -maxx*numpy.cos(freq*time.time()*2*numpy.pi), -maxx*numpy.cos(freq*time.time()*2*numpy.pi))
-
-
-def moveTestLigneDroite(coords, pates, x):
-	for i in range(6):
-		if i == 0:
-			moveLigneDroite(coords[i], pates[i], x, 0, 0)
-		if i in [1,2]:
-			moveLigneDroite(coords[i], pates[i], 0, x, 0)
-		if i == 3:
-			moveLigneDroite(coords[i], pates[i], -x, 0, 0)
-		if i in [4,5]:
-			moveLigneDroite(coords[i], pates[i], 0, -x, 0)
-	time.sleep(0.5)
-
-def moveTestLigneCote(coords, pates, y):
-	for i in range(6):
-		if i == 0:
-			moveLigneDroite(coords[i], pates[i], 0, -y, 0)
-		if i in [1,2]:
-			moveLigneDroite(coords[i], pates[i], y, 0, 0)
-		if i == 3:
-			moveLigneDroite(coords[i], pates[i], 0, y, 0)
-		if i in [4,5]:
-			moveLigneDroite(coords[i], pates[i], -y, 0, 0)
-	time.sleep(0.5)
-
-
-#!!!!!! Question 2 du projet !!!!!!!!
-def moveCenter(coords, pates, x, y, z):
-	for i in range(6):
-		if i == 0:
-			moveLigneDroite(coords[i], pates[i], x, -y, z)
-		if i == 1:
-			moveLigneDroite(coords[i], pates[i], y, x, z)
-		if i == 2:
-			moveLigneDroite(coords[i], pates[i], y, x, z)
-		if i == 3:
-			moveLigneDroite(coords[i], pates[i], -x, y, z)
-		if i == 4:
-			moveLigneDroite(coords[i], pates[i], -y, -x, z)
-		if i == 5:
-			moveLigneDroite(coords[i], pates[i], -y, -x, z)
-	time.sleep(0.1)
-
-def moveLigneDroite(coord, numPate, x, y, z):
-		#angles = dxl_io.get_present_position(numPate)
-		#coords = kinematics.computeDK(angles[0], angles[1], angles[2])
-		newCoords = [coord[0]+x, coord[1]+y, coord[2]+z]
-		angles = kinematics.computeIK(newCoords[0], newCoords[1], newCoords[2])
-		pos = dict(zip(numPate, angles))
-		dxl_io.set_goal_position(pos)
+import constant
+import init
+import debug
+import funcMouv
 
 if __name__ == '__main__':
 
-	# with closing(pypot.robot.from_json('robotConfig.json')) as robot:
-	with pypot.dynamixel.DxlIO('/dev/ttyUSB0', baudrate=1000000) as dxl_io:
+	init.initLimitAngles()
+	constant.dxl_io.enable_torque(constant.motor_ids)
+	init.initRobot()
+	time.sleep(1)
+	pygame.init()
+	fenetre = pygame.display.set_mode((constant.WINDOW_W, constant.WINDOW_H))
+	fond = pygame.image.load("Array.png").convert()
+	fenetre.blit(fond, (0, 0))
+	pygame.display.flip()
+	time.sleep(1)
+	print "ready"
+	run=1
 
-#		found_id = dxl_io.scan()
-#		print found_id
+	# Variable mouvement x, y, z for pate num 0
+	zleg=constant.coords[0][2]
+	xleg=constant.coords[0][0]
+	yleg=constant.coords[0][1]
 
-#		initLimitAngles()
+	dancing = False
+	move_leg = False
+	avance = False
+	writing = False
+	writingON = False
+	rotate = False
 
-		dxl_io.enable_torque(found_ids)
-		initRobot()
-		time.sleep(1)
-
-		pates = initPates()
-		coord = initPos(pates)
-
-
-		pygame.init()
-		fenetre = pygame.display.set_mode((WINDOW_W, WINDOW_H))
-		fond = pygame.image.load("Array.png").convert()
-		fenetre.blit(fond, (0, 0))
+	while run:
 		pygame.display.flip()
+		for event in pygame.event.get():
+			if event.type == MOUSEMOTION: #Si mouvement de souris
+				x = (event.pos[0] - constant.WINDOW_W/2) / constant.SCALE_PICTURE
+				y = (event.pos[1] - constant.WINDOW_H/2) / constant.SCALE_PICTURE
+			if event.type == MOUSEBUTTONDOWN:
+				if event.button == 1:
+					dancing = not dancing
+			if event.type == KEYDOWN:
+				if event.key == pygame.K_ESCAPE:
+					run=0
+				if event.key == pygame.K_w:
+					writing = not writing
+				if event.key == pygame.K_k:
+					writingON = not writingON
+				if event.key == pygame.K_l:
+					move_leg = not move_leg
+				if event.key == pygame.K_a:
+					avance = not avance
+				if event.key == pygame.K_UP:
+					zleg = zleg + constant.LENGTH_MOUVEMENT_LEG
+				if event.key == pygame.K_DOWN:
+					zleg = zleg - constant.LENGTH_MOUVEMENT_LEG
+				if event.key == pygame.K_KP8:
+					xleg = xleg + constant.LENGTH_MOUVEMENT_LEG
+				if event.key == pygame.K_KP2:
+					xleg = xleg - constant.LENGTH_MOUVEMENT_LEG
+				if event.key == pygame.K_KP4:
+					yleg = yleg + constant.LENGTH_MOUVEMENT_LEG
+				if event.key == pygame.K_KP6:
+					yleg = yleg - constant.LENGTH_MOUVEMENT_LEG
+				if event.key == pygame.K_d:
+					init.initRobot()
+				if event.key == pygame.K_r:
+					rotate = not rotate
+				if rotate and event.key == pygame.K_LEFT:
+					funcMouv.tournerLesPates(constant.coords, constant.pates, constant.LENGTH_MOUVEMENT_LEG)
+				if rotate and event.key == pygame.K_RIGHT:
+					funcMouv.tournerLesPates(constant.coords, constant.pates, -constant.LENGTH_MOUVEMENT_LEG)
 
 
-		#for i in found_ids:
-		#print dxl_io.get_angle_limit(found_ids)
-#		print dxl_io.get_compliance_margin(found_ids)
+		if writing :
+			if writingON :
+				funcMouv.moveCenter(constant.coords, constant.pates, x, y, constant.HEIGHT_TO_WRITE_ON)
+			if not writingON :
+				funcMouv.moveCenter(constant.coords, constant.pates, x, y, constant.HEIGHT_TO_WRITE_OFF)
+
+		if move_leg :
+			funcMouv.moveLeg(constant.pates, 0, xleg, yleg, zleg)
+
+		if dancing :
+			funcMouv.moveTestRotate(constant.LENGTH_DANCE, constant.FREQ_DANCE)
+
+		if(avance and (x<-constant.MOUSE_MOUVEMENT_MARGIN or x > constant.MOUSE_MOUVEMENT_MARGIN or y < -constant.MOUSE_MOUVEMENT_MARGIN or y > constant.MOUSE_MOUVEMENT_MARGIN)):
+			funcMouv.faitUnPasAvant(constant.coords, constant.pates, x, y)
 
 
-#		while 1:
-#			print dxl_io.get_present_position([62, 63])
-#			time.sleep(0.1)
 
-		print "ready"
-		time.sleep(0.5)
-		a=1
-		while a:
 
-			pygame.display.flip()
-#			tournerLesPates(coord, pates, 10)
-			for event in pygame.event.get():
-				if event.type == MOUSEMOTION: #Si mouvement de souris
-					x = (event.pos[0] - WINDOW_W/2)/5
-					y = (event.pos[1] - WINDOW_H/2)/5
-				if event.type == MOUSEBUTTONDOWN:
-					if event.button == 1:
-						dancing = not dancing
-				if event.type == KEYDOWN:
-					if event.key== pygame.K_ESCAPE:
-						a=0
+	constant.dxl_io.disable_torque(constant.motor_ids)
 
-			if dancing :
-				maxx = 10
-				freq = 4.5
-				moveTestRotate(maxx, freq)
 
-			print x
-			print y
-			if(x<-5 or x > 5 or y < -5 or y > 5):
-				faitUnPasAvant(coord, pates, x, y)
+
+
+
+
+
 #			faitUnPasAvant(coord, pates, 20, 20)
 #			faitUnPasAvant(coord, pates, -20, -20)
 #			faitUnPasAvant(coord, pates, -20, -20)
@@ -284,29 +133,28 @@ if __name__ == '__main__':
 
 
 #		while 1:
-#				angles = dxl_io.get_present_position(j)
+#				angles = constant.dxl_io.get_present_position(j)
 #				coords = kinematics.computeDK(angles[0], angles[1], angles[2])
 #				newCoords = [coords[0]+30, coords[1], coords[2]]
 #				angles = kinematics.computeIK(newCoords[0], newCoords[1], newCoords[2])
 #				pos = dict(zip(j, angles))
-#				dxl_io.set_goal_position(pos)
+#				constant.dxl_io.set_goal_position(pos)
 #				time.sleep(3)
 
 		# while 1:
 		# 	for i in pates:
-		# 		angles = dxl_io.get_present_position(i)
+		# 		angles = constant.dxl_io.get_present_position(i)
 		# 		coords = kinematics.computeDK(angles[0], angles[1], angles[2])
 		# 		newCoords = [coords[0], coords[1], coords[2]+1]
 		# 		angles = kinematics.computeIK(newCoords[0], newCoords[1], newCoords[2])
 		# 		pos = dict(zip(i, angles))
-		# 		dxl_io.set_goal_position(pos)
+		# 		constant.dxl_io.set_goal_position(pos)
 		# 	time.sleep(1)
 
 
 
-#		print 'Current pos:', dxl_io.get_present_position(found_ids)
+#		print 'Current pos:', constant.dxl_io.get_present_position(found_ids)
 
-		dxl_io.disable_torque(found_ids)
 		# time.sleep(1)  # we wait for 1s
 
 
@@ -323,6 +171,6 @@ if __name__ == '__main__':
 	        #print 'Cmd:', pos
 
 	        # we send these new positions
-	 #       dxl_io.set_goal_position(pos)
+	 #       constant.dxl_io.set_goal_position(pos)
 	        #time.sleep(0.01)  # we wait for 1s
 
