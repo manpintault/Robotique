@@ -2,7 +2,7 @@
 
 - Commenter le code (comprehensible par une personne externe)
 - le traduire en anglais
-
+- NE PAS OUBLIER de lui faire une fonction qui vérifie que chaque moteur soit à 50% de leur efficacité (enfin je sais pas si c'est des % mais ça doit etre à 50)
 
 
 Presque fini:
