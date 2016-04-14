@@ -26,4 +26,4 @@ def initRobot() :
 			constant.dxl_io.set_goal_position({i : -45})
 		else:
 			constant.dxl_io.set_goal_position({i : 0})
-		time.sleep(0.1)
+		time.sleep(constant.TIME_SLEEP)
