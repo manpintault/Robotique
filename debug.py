@@ -1,7 +1,7 @@
 import constant
 import time
 
-def checkLeg(tab) :
+def checkLeg(tab):
 	constant.dxl_io.set_goal_position({tab[0] : 0})
 	time.sleep(1)
 	constant.dxl_io.set_goal_position({tab[1] : 0})
@@ -19,3 +19,6 @@ def changeId(old, new):
 def checkId():
 	found_id = constant.dxl_io.scan()
 	print found_id
+
+def checkMaxTorque():
+	print constant.dxl_io.get_max_torque(constant.motor_ids)
