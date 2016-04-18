@@ -2,6 +2,8 @@ Fonctionnement:
 
 	-"a" pour avancer:
 		-le diriger avec la souris
+	-"c" pour avancer plus fluidement
+		-le diriger avec la souris
 	-"w" pour se mettre en mode écrire:
 		-"k" pour se baisser pour écrire
 		-"k" (deuxième fois) pour remonter
@@ -17,8 +19,12 @@ Fonctionnement:
 		-le diriger avec la souris
 	-"echap" pour quitter
 
+TODO : 
+	- faire attention et comprendre le bug qu'il y a parfois dans les dxl_communication.
+		De temps en temps le prog se stop car (je crois) un moteur n'a pas reçu d'info, où s'est déconnecté (A VERIFIER)
 
-AJOUT DE LA FONCTIONNALITE :  DEPLACEMENT PLUS JOLIE
-avec la touche "c"
+	- les limites de déplacement d'une seule patte ne sont pas gérer, elle peut aller à des position extremes
 
-en construction
+	- comprendre les bugs d'initialisations : 
+		-des fois il y a un moteur qui refuse de s'initialiser à une position et des fois bug à mort
+			pour le remettre normal il faut débrancher l'usb et l'alim et les remettre (ou se déco reco)

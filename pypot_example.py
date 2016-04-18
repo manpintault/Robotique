@@ -29,6 +29,8 @@ if __name__ == '__main__':
 	
 	# Variable mouvement z for leg num 0
 	zleg=constant.coords[0][2] + constant.LENGTH_MOUVEMENT_LEG
+	# Variable of robot speed when he's running
+	freq_speed_robot = constant.ROBOT_SPEED
 
 	# Statment variable to do action
 	dancing = False
@@ -39,20 +41,19 @@ if __name__ == '__main__':
 	rotate = False
 	gravityCenter = False
 	standUp = False
+	runing = False
 	run=1
 	print "ready"
-
-	runing = False
 
 	# Main of program
 	while run:
 		for event in pygame.event.get():
 			# Catch the mouvment of mouse
 			if event.type == MOUSEMOTION: 
-				x = (event.pos[0] - constant.WINDOW_W/2) / constant.SCALE_PICTURE
-				y = (event.pos[1] - constant.WINDOW_H/2) / constant.SCALE_PICTURE
+				x = (event.pos[0] - constant.WINDOW_W/2)
+				y = (event.pos[1] - constant.WINDOW_H/2)
 			# Catch the button click of mouse
-			if event.type == MOUSEBUTTONDOWN:
+			if event.type == MOUSEBUTTONDOWN and move_leg == False and avance == False and writing == False and rotate == False and gravityCenter == False and runing == False:
 				if event.button == 1:
 					standUp = not standUp
 					dancing = not dancing
@@ -62,7 +63,7 @@ if __name__ == '__main__':
 				if event.key == pygame.K_ESCAPE:
 					run=0
 				# "w" to begin write step
-				if event.key == pygame.K_w:
+				if event.key == pygame.K_w and move_leg == False and avance == False and dancing == False and rotate == False and gravityCenter == False and runing == False:
 					standUp = not standUp
 					writing = not writing
 					writingON = False
@@ -70,7 +71,7 @@ if __name__ == '__main__':
 				if event.key == pygame.K_k:
 					writingON = not writingON
 				# "l" to move leg
-				if event.key == pygame.K_l:
+				if event.key == pygame.K_l and dancing == False and avance == False and writing == False and rotate == False and gravityCenter == False and runing == False:
 					standUp = not standUp
 					move_leg = not move_leg
 					zleg=constant.coords[0][2] + constant.LENGTH_MOUVEMENT_LEG
@@ -81,13 +82,13 @@ if __name__ == '__main__':
 				if move_leg and event.key == pygame.K_DOWN:
 					zleg = zleg - constant.LENGTH_MOUVEMENT_LEG
 				# "a" to step Forward
-				if event.key == pygame.K_a:
+				if event.key == pygame.K_a and move_leg == False and dancing == False and writing == False and rotate == False and gravityCenter == False and runing == False:
 					avance = not avance
 				# "d" to stand up
 				if event.key == pygame.K_d:
 					standUp = not standUp
 				# "r" to rotate
-				if event.key == pygame.K_r:
+				if event.key == pygame.K_r and move_leg == False and avance == False and writing == False and dancing == False and gravityCenter == False and runing == False:
 					rotate = not rotate
 				# and "left" to rotate on left
 				if rotate and event.key == pygame.K_LEFT:
@@ -96,12 +97,26 @@ if __name__ == '__main__':
 				if rotate and event.key == pygame.K_RIGHT:
 					funcMouv.turnAround(constant.coords, constant.legs, -constant.LENGTH_ROTATE_LEG)
 				# "g" to move gravity center
-				if event.key == pygame.K_g:
+				if event.key == pygame.K_g and move_leg == False and avance == False and writing == False and rotate == False and dancing == False and runing == False:
 					standUp = not standUp
 					gravityCenter = not gravityCenter
-
-				if event.key == pygame.K_c:
+				# "c" to step Forward faster
+				if event.key == pygame.K_c and move_leg == False and avance == False and writing == False and rotate == False and gravityCenter == False and dancing == False:
+					freq_speed_robot = constant.ROBOT_SPEED
+					standUp = not standUp
 					runing = not runing
+				# and "+" to move fastly
+				if runing and event.key == pygame.K_KP_PLUS :
+					if freq_speed_robot < constant.MAX_ROBOT_SPEED :
+						freq_speed_robot = freq_speed_robot + constant.VARIATION_ROBOT_SPEED
+					else :
+						print "You can't move more faster."
+				# and "-" to move slowly
+				if runing and event.key == pygame.K_KP_MINUS :
+					if freq_speed_robot > constant.MIN_ROBOT_SPEED :
+						freq_speed_robot = freq_speed_robot - constant.VARIATION_ROBOT_SPEED
+					else :
+						print "You can't move more slower."
 
 		# Condition to Stand up
 		if standUp :
@@ -111,32 +126,32 @@ if __name__ == '__main__':
 		# Condition to writing
 		if writing :
 			if writingON :
-				funcMouv.moveCenter(constant.coords, constant.legs, x, y, constant.HEIGHT_TO_WRITE_ON)
+				funcMouv.moveCenter(constant.coords, constant.legs, (x/constant.SCALE_PICTURE_OTHER), (y/constant.SCALE_PICTURE_OTHER), constant.HEIGHT_TO_WRITE_ON)
 			if not writingON :
-				funcMouv.moveCenter(constant.coords, constant.legs, x, y, constant.HEIGHT_TO_WRITE_OFF)
+				funcMouv.moveCenter(constant.coords, constant.legs, (x/constant.SCALE_PICTURE_OTHER), (y/constant.SCALE_PICTURE_OTHER), constant.HEIGHT_TO_WRITE_OFF)
 
 		# Condition to move one leg
 		if move_leg :
-			funcMouv.moveLeg(constant.legs, 0, constant.coords[0][0]-y, constant.coords[0][1]-x, zleg)
+			funcMouv.moveLeg(constant.legs, 0, constant.coords[0][0]-(y/constant.SCALE_PICTURE_OTHER), constant.coords[0][1]-(x/constant.SCALE_PICTURE_OTHER), zleg)
 
 		# Condition to dancing
 		if dancing :
 			funcMouv.goToDance(constant.LENGTH_DANCE, constant.FREQ_DANCE)
 
 		# Condition to step Forward
-		if(avance and (x<-constant.MOUSE_MOUVEMENT_MARGIN or x > constant.MOUSE_MOUVEMENT_MARGIN or y < -constant.MOUSE_MOUVEMENT_MARGIN or y > constant.MOUSE_MOUVEMENT_MARGIN)):
-			funcMouv.doAStepForward(constant.coords, constant.legs, x, y)
+		if (avance and (x<-constant.MOUSE_MOUVEMENT_MARGIN or x > constant.MOUSE_MOUVEMENT_MARGIN or y < -constant.MOUSE_MOUVEMENT_MARGIN or y > constant.MOUSE_MOUVEMENT_MARGIN)):
+			funcMouv.doAStepForward(constant.coords, constant.legs, (x/constant.SCALE_PICTURE_WALK), (y/constant.SCALE_PICTURE_WALK))
 
 		# Condition to move his gravity center
 		if gravityCenter :
-			funcMouv.moveGravityCenter(constant.MGCcoords, constant.legs, x, y)
-
-
-
+			funcMouv.moveGravityCenter(constant.MGCcoords, constant.legs, (x/constant.SCALE_PICTURE_GRAVITY), (y/constant.SCALE_PICTURE_GRAVITY))
 
 		# Condition to runing
-		if(runing and (x<-constant.MOUSE_MOUVEMENT_MARGIN or x > constant.MOUSE_MOUVEMENT_MARGIN or y < -constant.MOUSE_MOUVEMENT_MARGIN or y > constant.MOUSE_MOUVEMENT_MARGIN)):
-			funcMouv.doABetterStepForward(constant.coords, constant.legs, x, y)
+		if runing :
+			if (x<-constant.MOUSE_MOUVEMENT_MARGIN or x > constant.MOUSE_MOUVEMENT_MARGIN or y < -constant.MOUSE_MOUVEMENT_MARGIN or y > constant.MOUSE_MOUVEMENT_MARGIN) :
+				funcMouv.doABetterStepForward(constant.coords, constant.legs, (x/constant.SCALE_PICTURE_RUN), (y/constant.SCALE_PICTURE_RUN), freq_speed_robot)
+			else :
+				funcMouv.standUp();
 
 	# Deactivate robot motors
 	constant.dxl_io.disable_torque(constant.motor_ids)

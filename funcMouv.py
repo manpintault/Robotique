@@ -5,12 +5,10 @@ import kinematics
 import itertools
 import math
 
-def doABetterStepForward(coords, legs, x, y):
+def doABetterStepForward(coords, legs, x, y, freq_speed_robot):
 
 
 #	LENGTH_DANCE = 30
-
-	freq_speed_robot = 0.4
 
 
 	# Calculation of sinusoid function for all motor
@@ -18,11 +16,12 @@ def doABetterStepForward(coords, legs, x, y):
 	cosinoide = numpy.cos(freq_speed_robot*time.time()*2*numpy.pi)
 
 	# Added some variables for differents functionings of some motors
-	moveBodySin = -constant.HEIGHT_TO_MOVE*sinusoide
-	moveBodyCos = -constant.HEIGHT_TO_MOVE*cosinoide
+	moveBodySinX = -x*sinusoide
+	moveBodySinY = -y*sinusoide
+	moveBodyCosZ = constant.HEIGHT_TO_MOVE*cosinoide
 
-	moveCenter1(constant.MGCcoords, constant.legs, moveBodySin, moveBodyCos, moveBodyCos)
-	moveCenter2(constant.MGCcoords, constant.legs, -moveBodySin, -moveBodyCos, -moveBodyCos)
+	moveCenter1(constant.MGCcoords, constant.legs, moveBodySinX, moveBodySinY, moveBodyCosZ)
+	moveCenter2(constant.MGCcoords, constant.legs, -moveBodySinX, -moveBodySinY, -moveBodyCosZ)
 
 
 	time.sleep(constant.TIME_SLEEP_DANCE)	
@@ -179,7 +178,7 @@ def moveGravityCenter(coords, legs, x, y):
 			moveOnZ(coords[i], legs[i], -y - varX)
 		if i == 5:
 			moveOnZ(coords[i], legs[i], -y + varX)
-	time.sleep(constant.TIME_SLEEP)
+#	time.sleep(constant.TIME_SLEEP_FOR_GRAVITY_CENTER)
 
 def standUp():
 	for i in range(constant.NB_LEGS):
