@@ -22,3 +22,6 @@ def checkId():
 
 def checkMaxTorque():
 	print constant.dxl_io.get_max_torque(constant.motor_ids)
+
+def checkTorqueLimit():
+	print constant.dxl_io.get_torque_limit(constant.motor_ids)

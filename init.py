@@ -27,3 +27,7 @@ def initRobot() :
 def initMaxTorque():
 	for i in constant.motor_ids:
 		constant.dxl_io.set_max_torque({i : constant.MOTOR_MAX_TORQUE})
+
+def initTorqueLimit():
+	for i in constant.motor_ids:
+		constant.dxl_io.set_max_torque({i : constant.MOTOR_TORQUE_LIMIT})

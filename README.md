@@ -7,6 +7,7 @@ Fonctionnement:
 	-"w" pour se mettre en mode écrire:
 		-"k" pour se baisser pour écrire
 		-"k" (deuxième fois) pour remonter
+		-"p" pour dessiner le motif du fichier "dessin.png"
 	-"l" pour bouger la patte n°1
 		-la diriger avec :
 			-flèche haut et bas pour l'axe z
@@ -18,19 +19,3 @@ Fonctionnement:
 	-"g" pour lui faire basculer son centre de gravité; 
 		-le diriger avec la souris
 	-"echap" pour quitter
-
-TODO : 
-	- faire attention et comprendre le bug qu'il y a parfois dans les dxl_communication.
-		De temps en temps le prog se stop car (je crois) un moteur n'a pas reçu d'info, où s'est déconnecté (A VERIFIER)
-
-	- les limites de déplacement d'une seule patte ne sont pas gérer, elle peut aller à des position extremes
-
-	- comprendre les bugs d'initialisations : 
-		-des fois il y a un moteur qui refuse de s'initialiser à une position et des fois bug à mort
-			pour le remettre normal il faut débrancher l'usb et l'alim et les remettre (ou se déco reco)
-
-
-	- ajouter la fonction draw de dessin.py
-		et tout mettre au norme (constante, anglais ...ect)
-
-	- et mettre dans une fonction de debug et init le torque limite

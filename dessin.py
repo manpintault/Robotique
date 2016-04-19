@@ -4,43 +4,36 @@ from PIL import Image
 import time
 
 def draw():
-	print "coucou"
+	# init and load image
 	im = Image.open("dessin.png")
+	# convert on white (255) or black (0)
 	im = im.convert('1')
 	pix = im.load()
 
 	right = True
-	x = 0
-	y = 0
-
-	out  = False
-
-HEIGHT_TO_WRITE_ON = 53
-HEIGHT_TO_WRITE_OFF = 50
-
-	for y in range(50):
-		for x in range(50):
+	# For x and y of image :
+	for y in range(constant.SIZE_IMAGE):
+		for x in range(constant.SIZE_IMAGE):
 			if(right):
-				print "", x, " et ", y, " = ",pix[x, y]
+				# Draw left to right
 				if(pix[x, y] == 0):
-					funcMouv.moveCenter(constant.coords, constant.legs, 
-						-25+(x), -25+(y), 
-						constant.HEIGHT_TO_WRITE_ON)
+					RightDoMoveOnX(x, y, constant.HEIGHT_TO_WRITE_ON)
 				else:
-					funcMouv.moveCenter(constant.coords, constant.legs, 
-						-25+(x), -25+(y), 
-						constant.HEIGHT_TO_WRITE_OFF)
-
+					RightDoMoveOnX(x, y, constant.HEIGHT_TO_WRITE_OFF)
 			else:
-				print "", 49-x, " et ", y, " = ",pix[49-x, y]
-				if(pix[49-x, y] == 0):
-					funcMouv.moveCenter(constant.coords, constant.legs, 
-						-25+(49-x), -25+(y), 
-						constant.HEIGHT_TO_WRITE_ON)
+				# Draw right to left
+				if(pix[(constant.SIZE_IMAGE -1)-x, y] == 0):
+					LeftDoMoveOnX(x, y, constant.HEIGHT_TO_WRITE_ON)
 				else:
-					funcMouv.moveCenter(constant.coords, constant.legs, 
-						-25+(49-x), -25+(y), 
-						constant.HEIGHT_TO_WRITE_OFF)
-
-			time.sleep(0.00005)
+					LeftDoMoveOnX(x, y, constant.HEIGHT_TO_WRITE_OFF)
+			time.sleep(constant.TIME_SLEEP_DRAWING)
 		right = not right
+
+def RightDoMoveOnX(x, y, z):
+	funcMouv.moveCenter(constant.coords, constant.legs, 
+		-(constant.SIZE_IMAGE/2)+x, -(constant.SIZE_IMAGE/2)+y, z)
+
+def LeftDoMoveOnX(x, y, z):
+	funcMouv.moveCenter(constant.coords, constant.legs, 
+		-(constant.SIZE_IMAGE/2)+((constant.SIZE_IMAGE -1)-x), 
+		-(constant.SIZE_IMAGE/2)+(y), z)

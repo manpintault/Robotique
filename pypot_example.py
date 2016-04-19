@@ -9,20 +9,16 @@ import constant
 import init
 import debug
 import funcMouv
+import dessin
 
 if __name__ == '__main__':
 
 	# Activate robot motors
 	constant.dxl_io.enable_torque(constant.motor_ids)
 
-	for i in constant.motor_ids:
-		constant.dxl_io.set_torque_limit({i: 100});
-		constant.dxl_io.set_max_torque({i: 100});
-	print constant.dxl_io.get_torque_limit(constant.motor_ids);
-	print constant.dxl_io.get_max_torque(constant.motor_ids);
-
 	# Initialization of the robot
 	init.initLimitAngles()
+	init.initTorqueLimit()
 	init.initMaxTorque()
 	init.initRobot()
 
@@ -42,6 +38,7 @@ if __name__ == '__main__':
 	dancing = False
 	move_leg = False
 	avance = False
+	onPosition = False
 	writing = False
 	writingON = False
 	rotate = False
@@ -72,10 +69,14 @@ if __name__ == '__main__':
 				if event.key == pygame.K_w and move_leg == False and avance == False and dancing == False and rotate == False and gravityCenter == False and runing == False:
 					standUp = not standUp
 					writing = not writing
+					onPosition = False
 					writingON = False
 				# "k" to begin writing
 				if event.key == pygame.K_k:
 					writingON = not writingON
+				# "p" to draw Image of "dessin.png"
+				if event.key == pygame.K_p and writingON == False:
+					dessin.draw()
 				# "l" to move leg
 				if event.key == pygame.K_l and dancing == False and avance == False and writing == False and rotate == False and gravityCenter == False and runing == False:
 					standUp = not standUp
@@ -94,7 +95,7 @@ if __name__ == '__main__':
 				if event.key == pygame.K_d:
 					standUp = not standUp
 				# "r" to rotate
-				if event.key == pygame.K_r and move_leg == False and avance == False and writing == False and dancing == False and gravityCenter == False :#and runing == False:
+				if event.key == pygame.K_r and move_leg == False and avance == False and writing == False and dancing == False and gravityCenter == False and runing == False:
 					rotate = not rotate
 				# and "left" to rotate on left
 				if rotate and event.key == pygame.K_LEFT:
@@ -107,7 +108,7 @@ if __name__ == '__main__':
 					standUp = not standUp
 					gravityCenter = not gravityCenter
 				# "c" to step Forward faster
-				if event.key == pygame.K_c and move_leg == False and avance == False and writing == False and gravityCenter == False and dancing == False:#""" and rotate == False"""
+				if event.key == pygame.K_c and move_leg == False and avance == False and writing == False and gravityCenter == False and dancing == False and rotate == False:
 					freq_speed_robot = constant.ROBOT_SPEED
 					standUp = not standUp
 					runing = not runing
@@ -127,10 +128,18 @@ if __name__ == '__main__':
 		# Condition to Stand up
 		if standUp :
 			funcMouv.standUp()
+			time.sleep(constant.TIME_SLEEP_STAND_UP)
+			funcMouv.standUp()
 			standUp = not standUp
 
 		# Condition to writing
 		if writing :
+			if (not onPosition):
+				for i in range(4):
+					funcMouv.moveCenter(constant.coords, constant.legs, 0, 0, i*10)
+					time.sleep(constant.TIME_SLEEP_WRITING)
+				onPosition = True
+
 			if writingON :
 				funcMouv.moveCenter(constant.coords, constant.legs, (x/constant.SCALE_PICTURE_OTHER), (y/constant.SCALE_PICTURE_OTHER), constant.HEIGHT_TO_WRITE_ON)
 			if not writingON :
