@@ -7,10 +7,6 @@ import math
 
 def doABetterStepForward(coords, legs, x, y, freq_speed_robot):
 
-
-#	LENGTH_DANCE = 30
-
-
 	# Calculation of sinusoid function for all motor
 	sinusoide = numpy.sin(freq_speed_robot*time.time()*2*numpy.pi)
 	cosinoide = numpy.cos(freq_speed_robot*time.time()*2*numpy.pi)
@@ -22,8 +18,6 @@ def doABetterStepForward(coords, legs, x, y, freq_speed_robot):
 
 	moveCenter1(constant.MGCcoords, constant.legs, moveBodySinX, moveBodySinY, moveBodyCosZ)
 	moveCenter2(constant.MGCcoords, constant.legs, -moveBodySinX, -moveBodySinY, -moveBodyCosZ)
-
-
 	time.sleep(constant.TIME_SLEEP_DANCE)	
 
 

@@ -28,3 +28,9 @@ TODO :
 	- comprendre les bugs d'initialisations : 
 		-des fois il y a un moteur qui refuse de s'initialiser à une position et des fois bug à mort
 			pour le remettre normal il faut débrancher l'usb et l'alim et les remettre (ou se déco reco)
+
+
+	- ajouter la fonction draw de dessin.py
+		et tout mettre au norme (constante, anglais ...ect)
+
+	- et mettre dans une fonction de debug et init le torque limite

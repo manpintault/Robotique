@@ -15,6 +15,12 @@ if __name__ == '__main__':
 	# Activate robot motors
 	constant.dxl_io.enable_torque(constant.motor_ids)
 
+	for i in constant.motor_ids:
+		constant.dxl_io.set_torque_limit({i: 100});
+		constant.dxl_io.set_max_torque({i: 100});
+	print constant.dxl_io.get_torque_limit(constant.motor_ids);
+	print constant.dxl_io.get_max_torque(constant.motor_ids);
+
 	# Initialization of the robot
 	init.initLimitAngles()
 	init.initMaxTorque()
@@ -88,7 +94,7 @@ if __name__ == '__main__':
 				if event.key == pygame.K_d:
 					standUp = not standUp
 				# "r" to rotate
-				if event.key == pygame.K_r and move_leg == False and avance == False and writing == False and dancing == False and gravityCenter == False and runing == False:
+				if event.key == pygame.K_r and move_leg == False and avance == False and writing == False and dancing == False and gravityCenter == False :#and runing == False:
 					rotate = not rotate
 				# and "left" to rotate on left
 				if rotate and event.key == pygame.K_LEFT:
@@ -101,7 +107,7 @@ if __name__ == '__main__':
 					standUp = not standUp
 					gravityCenter = not gravityCenter
 				# "c" to step Forward faster
-				if event.key == pygame.K_c and move_leg == False and avance == False and writing == False and rotate == False and gravityCenter == False and dancing == False:
+				if event.key == pygame.K_c and move_leg == False and avance == False and writing == False and gravityCenter == False and dancing == False:#""" and rotate == False"""
 					freq_speed_robot = constant.ROBOT_SPEED
 					standUp = not standUp
 					runing = not runing
@@ -110,13 +116,13 @@ if __name__ == '__main__':
 					if freq_speed_robot < constant.MAX_ROBOT_SPEED :
 						freq_speed_robot = freq_speed_robot + constant.VARIATION_ROBOT_SPEED
 					else :
-						print "You can't move more faster."
+						print "You can't move faster."
 				# and "-" to move slowly
 				if runing and event.key == pygame.K_KP_MINUS :
 					if freq_speed_robot > constant.MIN_ROBOT_SPEED :
 						freq_speed_robot = freq_speed_robot - constant.VARIATION_ROBOT_SPEED
 					else :
-						print "You can't move more slower."
+						print "You can't move slower."
 
 		# Condition to Stand up
 		if standUp :
