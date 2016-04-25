@@ -18,8 +18,8 @@ if __name__ == '__main__':
 
 	# Initialization of the robot
 	init.initLimitAngles()
-	init.initTorqueLimit()
 	init.initMaxTorque()
+	init.initTorqueLimit()
 	init.initRobot()
 
 	# Initialization of interface controler

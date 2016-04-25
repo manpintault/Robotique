@@ -148,14 +148,14 @@ def moveCenter(coords, legs, x, y, z):
 	time.sleep(constant.TIME_SLEEP_DANCE)
 
 def moveStraightOn(coords, numleg, x, y, z):
-		angles = kinematics.computeIK(coords[0]+x, coords[1]+y, coords[2]+z)
-		pos = dict(zip(numleg, angles))
-		constant.dxl_io.set_goal_position(pos)
+	angles = kinematics.computeIK(coords[0]+x, coords[1]+y, coords[2]+z)
+	pos = dict(zip(numleg, angles))
+	constant.dxl_io.set_goal_position(pos)
 
 def moveOnZ(coords, numleg, z):
-		angles = kinematics.computeIK(coords[0], coords[1], coords[2]-z)
-		pos = dict(zip(numleg, angles))
-		constant.dxl_io.set_goal_position(pos)
+	angles = kinematics.computeIK(coords[0], coords[1], coords[2]-z)
+	pos = dict(zip(numleg, angles))
+	constant.dxl_io.set_goal_position(pos)
 
 def moveGravityCenter(coords, legs, x, y):
 	varX = x*math.cos(constant.DIAGONAL_LEG_ANGLE)
