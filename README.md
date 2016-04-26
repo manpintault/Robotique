@@ -1,3 +1,4 @@
+********************************** Liste des commandes ***************************
 Fonctionnement:
 
 	-"a" pour avancer:
